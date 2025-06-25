@@ -34,7 +34,7 @@ userPassword = ctk.CTkEntry(inputFrame, width=300, show="*")
 userPassword.pack(padx=20, pady=5)
 
 #button frame
-buttonFrame = ctk.CTkFrame(app, fg_color="grey")
+buttonFrame = ctk.CTkFrame(app, fg_color="Black")
 buttonFrame.pack(pady=0)
 
 signInButton = ctk.CTkButton(buttonFrame, font=("Bold",15), text="Sign In", fg_color="Black")

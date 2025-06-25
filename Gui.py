@@ -4,24 +4,44 @@ from tkinter import messagebox
 #app
 app = ctk.CTk()
 app.title("Badminton Booking System") 
-app.geometry ("800x600")
+app.geometry ("1100x700")
 
-#Frame
-topFrame = ctk.CTkFrame(app)
-topFrame.pack(pady=50)
+#list
+bookings = {}
+user_info = {}
+selected_slots = []
 
-#TITLE
-titleLabel = ctk.CTkLabel(topFrame, text="Booking System", font=("Arial", 28))
-titleLabel.grid(row=0, column=0,)
+#Box Frame
+inputFrame = ctk.CTkFrame(app, fg_color="lightblue")
+inputFrame.pack(pady=5)
 
-#NConfigure app
-app.grid_columnconfigure(0, weight=1)
-app.grid_rowconfigure(0, weight= 1)
-app.grid_rowconfigure(1, weight= 4)
-app.grid_rowconfigure(2, weight= 1)
+#username
+userNameLabel = ctk.CTkLabel(inputFrame, text="User Name:")
+userNameLabel.pack(anchor="w", padx=20)
+userName = ctk.CTkEntry(inputFrame, width=300)
+userName.pack(padx=20, pady=5)
 
-#button
-signIn = ctk.CTkFrame(topFrame)
-signIn.grid(row=1, column= 0 , sticky="e", padx=15, pady=15)
+#email
+userEmailLabel = ctk.CTkLabel(inputFrame, text="Email:")
+userEmailLabel.pack(anchor="w", padx=20)
+userEmail = ctk.CTkEntry(inputFrame, width=300)
+userEmail.pack(padx=20, pady=5)
+
+#password
+userPasswordLabel = ctk.CTkLabel(inputFrame, text="Password:")
+userPasswordLabel.pack(anchor="w", padx=20)
+userPassword = ctk.CTkEntry(inputFrame, width=300, show="*")
+userPassword.pack(padx=20, pady=5)
+
+#button frame
+buttonFrame = ctk.CTkFrame(app, fg_color="grey")
+buttonFrame.pack(pady=0)
+
+signInButton = ctk.CTkButton(buttonFrame, font=("Bold",15), text="Sign In", fg_color="Black")
+signInButton.pack(anchor="w", padx=20)
+
+signUpButton = ctk.CTkButton(buttonFrame, font=("Bold",15), text="Sign Up", fg_color="Black")
+signUpButton.pack(anchor="w", padx=20)
+
 
 app.mainloop()

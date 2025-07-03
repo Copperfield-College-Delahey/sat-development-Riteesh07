@@ -1,0 +1,17 @@
+Using ai
+
+bookingDisplay.configure(state="disabled") #ai
+
+#to change pages
+def showFrame(frame):   #ai
+    frame.tkraise()
+
+from datetime import datetime #AI
+
+#AI
+for frame in (signInFrame, bookCourtFrame, paymentFrame):
+    frame.grid(row=1, column=0, sticky="nsew")
+def showFrame(frame):
+    frame.tkraise()
+
+userPassword = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14), show="*") #show was ai

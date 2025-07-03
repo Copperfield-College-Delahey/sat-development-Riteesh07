@@ -1,7 +1,6 @@
 import customtkinter as ctk 
 from tkinter import messagebox
-from datetime import datetime
-
+from datetime import datetime #AI
 
 # App setup
 ctk.set_appearance_mode("light")
@@ -12,53 +11,67 @@ app = ctk.CTk()
 app.title("Badminton Booking System") 
 app.geometry ("1100x700")
 
+app.grid_columnconfigure(0, weight=1)
+
 #Navigation stuff
 topNavFrame = ctk.CTkFrame(app, fg_color="grey", height=50)
-topNavFrame.pack(side="top", fill="x")
+topNavFrame.grid(row=0, column=0, sticky="ew")
 
 navFont = ctk.CTkFont(family="Arial", size=14, weight="bold")
 
 signInTabButton = ctk.CTkButton(topNavFrame, text="Sign In", font=navFont, width=100, command=lambda: showFrame(signInFrame))
-signInTabButton.pack(side="left", padx=2)
+signInTabButton.grid(row=0, column=0, padx=10, pady=10)
 
 bookCourtTabButton = ctk.CTkButton(topNavFrame, text="Book Court", font=navFont, width=100, command=lambda: showFrame(bookCourtFrame))
-bookCourtTabButton.pack(side="left", padx=2)
+bookCourtTabButton.grid(row=0, column=1, padx=10)
 
 paymentTabButton = ctk.CTkButton(topNavFrame, text="Payment", font=navFont, width=100, command=lambda: showFrame(paymentFrame))
-paymentTabButton.pack(side="left", padx=2)
+paymentTabButton.grid(row=0, column=2, padx=10)
 
 #pages
-signInFrame = ctk.CTkFrame(app).pack()
-bookCourtFrame = ctk.CTkFrame(app).pack()
-paymentFrame = ctk.CTkFrame(app).pack()
+signInFrame = ctk.CTkFrame(app)
+bookCourtFrame = ctk.CTkFrame(app)
+paymentFrame = ctk.CTkFrame(app)
+
+for frame in (signInFrame, bookCourtFrame, paymentFrame):  #AI
+    frame.grid(row=1, column=0, sticky="nsew")
+
+def showFrame(frame):   #ai
+    frame.tkraise()
 
 #list
 bookings = {}
 user_info = {}
 selected_slots = []
 
-#to change pages
-def showFrame(frame):   #ai
-    frame.tkraise()
 
 #Sign in page
-inputFrame = ctk.CTkFrame(app, fg_color="lightblue")
-inputFrame.pack(pady=5)
 
-userNameLabel = ctk.CTkLabel(inputFrame, text="User Name:")
-userNameLabel.pack(anchor="w", padx=20)
-userName = ctk.CTkEntry(inputFrame, width=300)
-userName.pack(padx=20, pady=5)
+signInFrame.grid_columnconfigure(0, weight=1)
+signInFrame.grid_rowconfigure(1, weight=2)   
+signInFrame.grid_rowconfigure(2, weight=1)  
+signInFrame.grid_rowconfigure(3, weight=1)   
+signInFrame.grid_rowconfigure(4, weight=1)  
+signInFrame.grid_rowconfigure(5, weight=1)   
 
-userEmailLabel = ctk.CTkLabel(inputFrame, text="Email:")
-userEmailLabel.pack(anchor="w", padx=20)
-userEmail = ctk.CTkEntry(inputFrame, width=300)
-userEmail.pack(padx=20, pady=5)
+inputFrame = ctk.CTkFrame(signInFrame, fg_color="light blue")
+inputFrame.grid(row=1, column=0, pady=10, padx=40, sticky="nsew")
+inputFrame.grid_columnconfigure(0, weight=1)
 
-userPasswordLabel = ctk.CTkLabel(inputFrame, text="Password:")
-userPasswordLabel.pack(anchor="w", padx=20)
-userPassword = ctk.CTkEntry(inputFrame, width=300, show="*")
-userPassword.pack(padx=20, pady=5)
+userNameLabel = ctk.CTkLabel(inputFrame, text="User Name:", font=("Arial", 18))
+userNameLabel.grid(row=0, column=0, sticky="w", padx=30, pady=(20, 5))
+userName = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14))
+userName.grid(row=1, column=0, padx=30, pady=(0, 10))
+
+userEmailLabel = ctk.CTkLabel(inputFrame, text="Email:", font=("Arial", 18))
+userEmailLabel.grid(row=2, column=0, sticky="w", padx=30, pady=(10, 5))
+userEmail = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14))
+userEmail.grid(row=3, column=0, padx=30, pady=(0, 10))
+
+userPasswordLabel = ctk.CTkLabel(inputFrame, text="Password:", font=("Arial", 18))
+userPasswordLabel.grid(row=4, column=0, sticky="w", padx=30, pady=(10, 5))
+userPassword = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14), show="*") #show was ai
+userPassword.grid(row=5, column=0, padx=30, pady=(0, 20))
 
 #functions
 def sign_in():
@@ -81,7 +94,7 @@ def sign_up():
     if not name or not email or not password:
         messagebox.showerror("Error", "Please fill in the fields")
     else:
-        messagebox.showinfo("Signed Up", f"acoount is created, {name}!")
+        messagebox.showinfo("Signed Up", f"account is created, {name}!")
 
 def showBookingAvailabilities():
     messagebox.showinfo("Bookings")
@@ -91,40 +104,41 @@ def cancelSelectedBooking():
 
 
 #button frames 
-buttonFrame = ctk.CTkFrame(app, fg_color="black")
-buttonFrame.pack(pady=0)
+buttonFrame = ctk.CTkFrame(signInFrame, fg_color="transparent")
+buttonFrame.grid(row=2, column=0, pady=5)
 
-signInButton = ctk.CTkButton(buttonFrame, font=("Bold",15), text="Sign In", fg_color="Black")
-signInButton.pack(anchor="w", padx=20)
+signInButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign In", width=200, height=45, fg_color="black", command=sign_in)
+signInButton.grid(row=0, column=0, padx=20, pady=10)
 
-signUpButton = ctk.CTkButton(buttonFrame, font=("Bold",15), text="Sign Up", fg_color="Black")
-signUpButton.pack(anchor="w", padx=20)
+signUpButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign Up", width=200, height=45, fg_color="black", command=sign_up)
+signUpButton.grid(row=0, column=1, padx=20, pady=10)
 
 
 #Booking Box
-ctk.CTkLabel(app, text="Your Bookings:", font=ctk.CTkFont(size=15, underline=True)).pack(pady=(20, 0))
+ctk.CTkLabel(signInFrame, text="Your Bookings:", font=ctk.CTkFont(size=16, underline=True)).grid(row=3, column=0, pady=(20, 0))
 
-bookingDisplay = ctk.CTkTextbox(app, width=600, height=100, fg_color="light blue", text_color="black")
-bookingDisplay.insert("0.0", "Date: 25/07/2025 | Court: 1 | Time: 6:00 PM – 7:00 PM")
+bookingDisplay = ctk.CTkTextbox(signInFrame, width=600, height=100, fg_color="light blue", text_color="black")
+bookingDisplay.grid(row=4, column=0, pady=10)
 bookingDisplay.configure(state="disabled") #ai
-bookingDisplay.pack(pady=10)
+bookingDisplay.insert("0.0", "Date: 25/07/2025 | Court: 1 | Time: 6:00 PM – 7:00 PM")
+
 
 #Booking tab
-ctk.CTkLabel(bookCourtFrame, text="Book Court Page", font=("Arial", 24)).pack(pady=50)
-
+bookCourtFrame.grid_columnconfigure(0, weight=1)
+ctk.CTkLabel(bookCourtFrame, text="Book Court Page", font=("Arial", 24)).grid(row=0, column=0, pady=50)
 
 
 #Green red button
-actionFrame = ctk.CTkFrame(app, fg_color="transparent")
-actionFrame.pack(pady=10)
+actionFrame = ctk.CTkFrame(signInFrame, fg_color="transparent")
+actionFrame.grid(row=5, column=0, pady=10)
 
 showButton = ctk.CTkButton(actionFrame, text="Show Booking Availabilities", fg_color="green", width=260)
-showButton.pack(pady=5)
+showButton.grid(row=0, column=0, padx=20, pady=10)
 
 cancelButton = ctk.CTkButton(actionFrame, text="Cancel Selected Bookings", fg_color="red", width=260)
-cancelButton.pack(pady=5)
+cancelButton.grid(row=0, column=1, padx=20, pady=10)
 
 #the initaial page 
-showFrame(bookCourtFrame)  #ai
+showFrame(signInFrame)  #ai
 
 app.mainloop()

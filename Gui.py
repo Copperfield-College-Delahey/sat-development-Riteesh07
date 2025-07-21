@@ -43,6 +43,7 @@ def showFrame(frame):   #ai
 bookings = {}
 user_info = {}
 selected_slots = []
+registered_users = {}
 
 
 #Sign in page
@@ -75,15 +76,19 @@ userPassword.grid(row=5, column=0, padx=30, pady=(0, 20))
 
 #functions
 def sign_in():
-    name = userName.get()
     email = userEmail.get()
     password = userPassword.get()
-
-    if not name or not email or not password:
-        messagebox.showerror("Error", "Please fill in the fields.")
+    if not email or not password:
+        messagebox.showerror("Error", "Please enter email and password.")
+    elif "@gmail.com" not in email:
+        messagebox.showerror("Invalid Email", "Only Gmail addresses are accepted.")
+    elif email not in registered_users:
+        messagebox.showerror("Account Not Found", "This email is not registered. Please sign up first.")
+    elif registered_users[email]["password"] != password:
+        messagebox.showerror("Wrong Password", "The password entered is incorrect.")
     else:
-        messagebox.showinfo("Signed In", f"Welcome, {name}!")
-
+        name = registered_users[email]["name"]
+        messagebox.showinfo("Signed In", f"Welcome back, {name}!")
 
 
 def sign_up():
@@ -92,9 +97,15 @@ def sign_up():
     password = userPassword.get()
 
     if not name or not email or not password:
-        messagebox.showerror("Error", "Please fill in the fields")
+        messagebox.showerror("Error", "Please fill in the fields.")
+    elif "@gmail.com" not in email:
+        messagebox.showerror("Invalid Email", "Only Gmail addresses are accepted.")
+    elif email in registered_users:
+        messagebox.showwarning("Already Registered", "This email is already signed up.")
     else:
-        messagebox.showinfo("Signed Up", f"account is created, {name}!")
+        registered_users[email] = {"name": name, "password": password}
+        messagebox.showinfo("Signed Up", f"Account created, {name}!")
+    
 
 def showBookingAvailabilities():
     messagebox.showinfo("Bookings")

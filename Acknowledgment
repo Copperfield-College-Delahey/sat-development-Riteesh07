@@ -15,3 +15,8 @@ def showFrame(frame):
     frame.tkraise()
 
 userPassword = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14), show="*") #show was ai
+
+#AI TO MAKE IT CENTRED
+gridWrapper = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
+gridWrapper.grid(row=1, column=0, pady=20)
+gridWrapper.grid_columnconfigure(tuple(range(slot_count + 1)), weight=1)

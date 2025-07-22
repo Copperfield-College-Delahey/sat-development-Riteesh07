@@ -152,4 +152,34 @@ cancelButton.grid(row=0, column=1, padx=20, pady=10)
 #the initaial page 
 showFrame(signInFrame)  #ai
 
+
+#Booking Page
+
+court_count = 8
+slot_count = 6
+time_slots = ["9-10", "10-11", "11-12", "12-13", "13-14", "14-15"]
+
+#AI TO MAKE IT CENTRED
+gridWrapper = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
+gridWrapper.grid(row=1, column=0, pady=20)
+gridWrapper.grid_columnconfigure(tuple(range(slot_count + 1)), weight=1)
+
+#Time slots
+ctk.CTkLabel(gridWrapper, text="Pick Date and Time", fg_color="yellow", width=100).grid(row=0, column=0, padx=1, pady=1)
+for i in range(slot_count):
+    ctk.CTkLabel(gridWrapper, text=time_slots[i], fg_color="lightblue", width=100).grid(row=0, column=i+1, padx=1, pady=1)
+
+booking_buttons = []  # to store all buttons if needed later
+
+for court in range(court_count):
+    ctk.CTkLabel(gridWrapper, text=f"Court {court+1}", fg_color="lightblue", width=100).grid(row=court+1, column=0, padx=1, pady=1)
+
+    row_buttons = []
+    for slot in range(slot_count):
+        btn = ctk.CTkButton(gridWrapper, text="", fg_color="green", width=100, height=40)
+        btn.grid(row=court+1, column=slot+1, padx=1, pady=1)
+        row_buttons.append(btn)
+
+    booking_buttons.append(row_buttons)
+
 app.mainloop()

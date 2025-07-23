@@ -108,7 +108,7 @@ def sign_up():
     
 
 def showBookingAvailabilities():
-    messagebox.showinfo("Bookings")
+    showFrame(bookCourtFrame)
 
 def cancelSelectedBooking():
     messagebox.showinfo("Cancelled", "Booking has been cancelled.")
@@ -143,7 +143,7 @@ ctk.CTkLabel(bookCourtFrame, text="Book Court Page", font=("Arial", 24)).grid(ro
 actionFrame = ctk.CTkFrame(signInFrame, fg_color="transparent")
 actionFrame.grid(row=5, column=0, pady=10)
 
-showButton = ctk.CTkButton(actionFrame, text="Show Booking Availabilities", fg_color="green", width=260)
+showButton = ctk.CTkButton(actionFrame, text="Show Booking Availabilities", fg_color="green", width=260, command=showBookingAvailabilities)
 showButton.grid(row=0, column=0, padx=20, pady=10)
 
 cancelButton = ctk.CTkButton(actionFrame, text="Cancel Selected Bookings", fg_color="red", width=260)
@@ -155,31 +155,45 @@ showFrame(signInFrame)  #ai
 
 #Booking Page
 
-court_count = 8
-slot_count = 6
-time_slots = ["9-10", "10-11", "11-12", "12-13", "13-14", "14-15"]
+courtCount = 8
+slotCount = 6
+timeSlots = ["9-10", "10-11", "11-12", "12-13", "13-14", "14-15"]
 
 #AI TO MAKE IT CENTRED
 gridWrapper = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
 gridWrapper.grid(row=1, column=0, pady=20)
-gridWrapper.grid_columnconfigure(tuple(range(slot_count + 1)), weight=1)
+gridWrapper.grid_columnconfigure(tuple(range(slotCount + 1)), weight=1)
 
 #Time slots
 ctk.CTkLabel(gridWrapper, text="Pick Date and Time", fg_color="yellow", width=100).grid(row=0, column=0, padx=1, pady=1)
-for i in range(slot_count):
-    ctk.CTkLabel(gridWrapper, text=time_slots[i], fg_color="lightblue", width=100).grid(row=0, column=i+1, padx=1, pady=1)
+for i in range(slotCount):
+    ctk.CTkLabel(gridWrapper, text=timeSlots[i], fg_color="lightblue", width=100).grid(row=0, column=i+1, padx=1, pady=1)
 
-booking_buttons = []  # to store all buttons if needed later
+bookingButtons = []  # to store all buttons if needed later
+selectedSlots = set()
 
-for court in range(court_count):
-    ctk.CTkLabel(gridWrapper, text=f"Court {court+1}", fg_color="lightblue", width=100).grid(row=court+1, column=0, padx=1, pady=1)
+#confirm button
+def updateTotalPrice():
+    total = len(selected_slots)* 27
+    totalLabel.configure(text=f"Total: ${total}")
+    if total > 0:
+        totalLabel.grid(row=2, column = 0, sticky= "w", padx=10)
+        confirmButton.grid(row=2, column=0, sticky="e", padx=10)
+    else:
+        totalLabel.grid_remove()
+        confirmButton.grid_remove()
 
-    row_buttons = []
-    for slot in range(slot_count):
-        btn = ctk.CTkButton(gridWrapper, text="", fg_color="green", width=100, height=40)
-        btn.grid(row=court+1, column=slot+1, padx=1, pady=1)
-        row_buttons.append(btn)
+#Slot colours
+def togggleSlot(court, slot, btn):
+    key = (court,slot)
+    if key in selectedSlots:
+        seletectedSlots.remove(key)
+        btn.configure(fg_colour="green")
+    else:
+        selectedSlots.add(key)
+        btn.configure(fg_colour="yellow")
+    updateTotalPrice()
 
-    booking_buttons.append(row_buttons)
+
 
 app.mainloop()

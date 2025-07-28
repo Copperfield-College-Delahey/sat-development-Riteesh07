@@ -81,7 +81,7 @@ def sign_in():
     if not email or not password:
         messagebox.showerror("Error", "Please enter email and password.")
     elif "@gmail.com" not in email:
-        messagebox.showerror("Invalid Email", "Only Gmail addresses are accepted.")
+        messagebox.showerror("Invalid Email", "Only @ Gmail addresses are accepted.")
     elif email not in registered_users:
         messagebox.showerror("Account Not Found", "This email is not registered. Please sign up first.")
     elif registered_users[email]["password"] != password:
@@ -184,16 +184,38 @@ def updateTotalPrice():
         confirmButton.grid_remove()
 
 #Slot colours
-def togggleSlot(court, slot, btn):
+def toggleSlot(court, slot, btn):
     key = (court,slot)
     if key in selectedSlots:
         seletectedSlots.remove(key)
-        btn.configure(fg_colour="green")
+        btn.configure(fg_color="green")
     else:
         selectedSlots.add(key)
-        btn.configure(fg_colour="yellow")
+        btn.configure(fg_color="yellow")
     updateTotalPrice()
 
+#Generate court and slot times
+for court in range(courtCount):
+    ctk.CTkLabel(gridWrapper, text=f"Court {court + 1}", fg_color="lightblue", width=100).grid(row=court + 1, column=0, padx=1, pady=1)
 
+    rowButtons = []
+    for slot in range(slotCount):
+        btn = ctk.CTkButton(gridWrapper, text="", fg_color="green", width=100, height=40)
+        btn.grid(row=court + 1, column=slot + 1, padx=1, pady=1)
+        btn.configure(command=lambda c=court, s=slot, b=btn: toggleSlot(c, s, b))
+        rowButtons.append(btn)
+
+    bookingButtons.append(rowButtons)
+
+#the confirm button AI
+bottomActionFrame = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
+bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
+bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
+
+totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))
+confirmButton = ctk.CTkButton(bottomActionFrame, text="Confirm Booking", font=("Arial", 16), fg_color="blue", width=180)
+
+totalLabel.grid_remove()
+confirmButton.grid_remove()
 
 app.mainloop()

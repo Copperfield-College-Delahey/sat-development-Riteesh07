@@ -75,7 +75,7 @@ userPassword = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14)
 userPassword.grid(row=5, column=0, padx=30, pady=(0, 20))
 
 #functions
-def sign_in():
+def signIn():
     email = userEmail.get()
     password = userPassword.get()
     if not email or not password:
@@ -91,7 +91,7 @@ def sign_in():
         messagebox.showinfo("Signed In", f"Welcome back, {name}!")
 
 
-def sign_up():
+def signUp():
     name = userName.get()
     email = userEmail.get()
     password = userPassword.get()
@@ -118,10 +118,10 @@ def cancelSelectedBooking():
 buttonFrame = ctk.CTkFrame(signInFrame, fg_color="transparent")
 buttonFrame.grid(row=2, column=0, pady=5)
 
-signInButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign In", width=200, height=45, fg_color="black", command=sign_in)
+signInButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign In", width=200, height=45, fg_color="black", command=signIn)
 signInButton.grid(row=0, column=0, padx=20, pady=10)
 
-signUpButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign Up", width=200, height=45, fg_color="black", command=sign_up)
+signUpButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign Up", width=200, height=45, fg_color="black", command=signUp)
 signUpButton.grid(row=0, column=1, padx=20, pady=10)
 
 
@@ -219,7 +219,7 @@ for court in range(courtCount):
     bookingButtons.append(rowButtons)
     slotButtons.update({(court, slot): btn for slot, btn in enumerate(rowButtons)})
 
-#the confirm button AI
+#the confirm button (HALF AI)
 bottomActionFrame = ctk.CTkFrame(bookCourtFrame)
 bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
 bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
@@ -239,6 +239,16 @@ totalLabel.grid_remove()
 confirmButton.grid_remove()
 
 
+#Payment tab
+paymentLabel = ctk.CTkLabel(paymentFrame, text="", font=("Arial", 16), wraplength=400, justify="center")
+paymentLabel.pack(pady=30)
+
+def paymentOK():
+    messagebox.showinfo("Email Sent", "Your booking has been confirmed and an email has been sent.")
+    showFrame(signInFrame)
+
+okButton = ctk.CTkButton(paymentFrame, text="OK", fg_color="grey", command=paymentOK)
+okButton.pack(pady=20)
 
 
 

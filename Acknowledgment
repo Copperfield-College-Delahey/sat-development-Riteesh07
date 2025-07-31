@@ -21,13 +21,35 @@ gridWrapper = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
 gridWrapper.grid(row=1, column=0, pady=20)
 gridWrapper.grid_columnconfigure(tuple(range(slot_count + 1)), weight=1)
 
-#the confirm button AI
-bottomActionFrame = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
+#Generate court and slot times (HALF AI)
+for court in range(courtCount):
+    ctk.CTkLabel(gridWrapper, text=f"Court {court + 1}", fg_color="lightblue", width=100).grid(row=court + 1, column=0, padx=1, pady=1)
+
+    rowButtons = []
+    for slot in range(slotCount):
+        btn = ctk.CTkButton(gridWrapper, text="", fg_color="green", width=100, height=40)
+        btn.grid(row=court + 1, column=slot + 1, padx=1, pady=1)
+        btn.configure(command=lambda c=court, s=slot: toggleSlot(c, s))
+        rowButtons.append(btn)
+
+    bookingButtons.append(rowButtons)
+    slotButtons.update({(court, slot): btn for slot, btn in enumerate(rowButtons)})
+
+#the confirm button (HALF AI)
+bottomActionFrame = ctk.CTkFrame(bookCourtFrame)
 bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
 bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
 
-totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))
-confirmButton = ctk.CTkButton(bottomActionFrame, text="Confirm Booking", font=("Arial", 16), fg_color="blue", width=180)
 
+def confirmBooking():
+    total = len(selectedSlots) * pricePerSlot
+    paymentLabel.configure(
+        text=f"Total Cost: ${total}\nPayment on site.\nClick OK to confirm your booking and receive an email"
+    )
+    showFrame(paymentFrame)
+
+
+totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))
+confirmButton = ctk.CTkButton(bottomActionFrame, text="Confirm Booking", font=("Arial", 16), fg_color="blue", width=180, command=confirmBooking)
 totalLabel.grid_remove()
 confirmButton.grid_remove()

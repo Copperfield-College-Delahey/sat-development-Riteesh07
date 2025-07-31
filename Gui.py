@@ -41,9 +41,9 @@ def showFrame(frame):   #ai
 
 #list
 bookings = {}
-user_info = {}
-selected_slots = []
-registered_users = {}
+userInfo = {}
+selectedSlots = set()
+registeredUsers = {}
 
 
 #Sign in page
@@ -82,12 +82,12 @@ def sign_in():
         messagebox.showerror("Error", "Please enter email and password.")
     elif "@gmail.com" not in email:
         messagebox.showerror("Invalid Email", "Only @ Gmail addresses are accepted.")
-    elif email not in registered_users:
+    elif email not in registeredUsers:
         messagebox.showerror("Account Not Found", "This email is not registered. Please sign up first.")
-    elif registered_users[email]["password"] != password:
+    elif registeredUsers[email]["password"] != password:
         messagebox.showerror("Wrong Password", "The password entered is incorrect.")
     else:
-        name = registered_users[email]["name"]
+        name = registeredUsers[email]["name"]
         messagebox.showinfo("Signed In", f"Welcome back, {name}!")
 
 
@@ -100,10 +100,10 @@ def sign_up():
         messagebox.showerror("Error", "Please fill in the fields.")
     elif "@gmail.com" not in email:
         messagebox.showerror("Invalid Email", "Only Gmail addresses are accepted.")
-    elif email in registered_users:
+    elif email in registeredUsers:
         messagebox.showwarning("Already Registered", "This email is already signed up.")
     else:
-        registered_users[email] = {"name": name, "password": password}
+        registeredUsers[email] = {"name": name, "password": password}
         messagebox.showinfo("Signed Up", f"Account created, {name}!")
     
 
@@ -128,7 +128,7 @@ signUpButton.grid(row=0, column=1, padx=20, pady=10)
 #Booking Box
 ctk.CTkLabel(signInFrame, text="Your Bookings:", font=ctk.CTkFont(size=16, underline=True)).grid(row=3, column=0, pady=(20, 0))
 
-bookingDisplay = ctk.CTkTextbox(signInFrame, width=600, height=100, fg_color="light blue", text_color="black")
+bookingDisplay = ctk.CTkTextbox(signInFrame, width=600, height=200, fg_color="light blue", text_color="black")
 bookingDisplay.grid(row=4, column=0, pady=10)
 bookingDisplay.configure(state="disabled") #ai
 bookingDisplay.insert("0.0", "Date: 25/07/2025 | Court: 1 | Time: 6:00 PM – 7:00 PM")
@@ -140,14 +140,17 @@ ctk.CTkLabel(bookCourtFrame, text="Book Court Page", font=("Arial", 24)).grid(ro
 
 
 #Green red button
+
 actionFrame = ctk.CTkFrame(signInFrame, fg_color="transparent")
-actionFrame.grid(row=5, column=0, pady=10)
+actionFrame.grid(row=4, column=0, pady=(120,5), sticky="nsew")
 
-showButton = ctk.CTkButton(actionFrame, text="Show Booking Availabilities", fg_color="green", width=260, command=showBookingAvailabilities)
-showButton.grid(row=0, column=0, padx=20, pady=10)
+actionFrame.grid_columnconfigure((0, 1), weight=1)  # Make columns expand
 
-cancelButton = ctk.CTkButton(actionFrame, text="Cancel Selected Bookings", fg_color="red", width=260)
-cancelButton.grid(row=0, column=1, padx=20, pady=10)
+showButton = ctk.CTkButton( actionFrame, text="Show Booking Availabilities", fg_color="#28a745",hover_color="#218838", text_color="white", width=250, height=50,  font=("Arial", 16, "bold"), command=showBookingAvailabilities)
+showButton.grid(row=0, column=0, padx=20, pady=10, sticky="e")
+
+cancelButton = ctk.CTkButton(actionFrame,text="Cancel Selected Bookings",fg_color="#dc3545",hover_color="#c82333",text_color="white",width=250,height=50,font=("Arial", 16, "bold"))
+cancelButton.grid(row=0, column=1, padx=20, pady=10, sticky="w")
 
 #the initaial page 
 showFrame(signInFrame)  #ai
@@ -158,6 +161,11 @@ showFrame(signInFrame)  #ai
 courtCount = 8
 slotCount = 6
 timeSlots = ["9-10", "10-11", "11-12", "12-13", "13-14", "14-15"]
+pricePerSlot = 27
+
+slotButtons = {}
+bookedSlots = set()
+selectedSlots = set()
 
 #AI TO MAKE IT CENTRED
 gridWrapper = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
@@ -170,11 +178,10 @@ for i in range(slotCount):
     ctk.CTkLabel(gridWrapper, text=timeSlots[i], fg_color="lightblue", width=100).grid(row=0, column=i+1, padx=1, pady=1)
 
 bookingButtons = []  # to store all buttons if needed later
-selectedSlots = set()
 
 #confirm button
 def updateTotalPrice():
-    total = len(selected_slots)* 27
+    total = len(selectedSlots)* pricePerSlot
     totalLabel.configure(text=f"Total: ${total}")
     if total > 0:
         totalLabel.grid(row=2, column = 0, sticky= "w", padx=10)
@@ -184,17 +191,21 @@ def updateTotalPrice():
         confirmButton.grid_remove()
 
 #Slot colours
-def toggleSlot(court, slot, btn):
+def toggleSlot(court, slot):
     key = (court,slot)
+    btn = slotButtons[key]
+    if key in bookedSlots:
+        return
+
     if key in selectedSlots:
-        seletectedSlots.remove(key)
+        selectedSlots.remove(key)
         btn.configure(fg_color="green")
     else:
         selectedSlots.add(key)
         btn.configure(fg_color="yellow")
     updateTotalPrice()
 
-#Generate court and slot times
+#Generate court and slot times AI
 for court in range(courtCount):
     ctk.CTkLabel(gridWrapper, text=f"Court {court + 1}", fg_color="lightblue", width=100).grid(row=court + 1, column=0, padx=1, pady=1)
 
@@ -202,20 +213,33 @@ for court in range(courtCount):
     for slot in range(slotCount):
         btn = ctk.CTkButton(gridWrapper, text="", fg_color="green", width=100, height=40)
         btn.grid(row=court + 1, column=slot + 1, padx=1, pady=1)
-        btn.configure(command=lambda c=court, s=slot, b=btn: toggleSlot(c, s, b))
+        btn.configure(command=lambda c=court, s=slot: toggleSlot(c, s))
         rowButtons.append(btn)
 
     bookingButtons.append(rowButtons)
+    slotButtons.update({(court, slot): btn for slot, btn in enumerate(rowButtons)})
 
 #the confirm button AI
-bottomActionFrame = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
+bottomActionFrame = ctk.CTkFrame(bookCourtFrame)
 bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
 bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
 
-totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))
-confirmButton = ctk.CTkButton(bottomActionFrame, text="Confirm Booking", font=("Arial", 16), fg_color="blue", width=180)
 
+def confirmBooking():
+    total = len(selectedSlots) * pricePerSlot
+    paymentLabel.configure(
+        text=f"Total Cost: ${total}\nPayment on site.\nClick OK to confirm your booking and receive an email"
+    )
+    showFrame(paymentFrame)
+
+
+totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))
+confirmButton = ctk.CTkButton(bottomActionFrame, text="Confirm Booking", font=("Arial", 16), fg_color="blue", width=180, command=confirmBooking)
 totalLabel.grid_remove()
 confirmButton.grid_remove()
+
+
+
+
 
 app.mainloop()

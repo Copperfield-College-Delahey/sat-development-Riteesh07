@@ -35,7 +35,7 @@ for frame in (signInFrame, bookCourtFrame, paymentFrame):  #AI
 def showFrame(frame):   #ai
     frame.tkraise()
 
-#list
+#Dictionary
 bookings = {}
 userInfo = {}
 selectedSlots = set()
@@ -72,7 +72,7 @@ userPassword.grid(row=5, column=0, padx=30, pady=(0, 20))
 
 #functions
 def signIn():
-    global isLoggedIn
+    global isLoggedIn #AI
     name = userName.get()
     email = userEmail.get()
     password = userPassword.get()
@@ -121,6 +121,9 @@ paymentTabButton = ctk.CTkButton(topNavFrame, text="Payment", font=navFont, widt
 paymentTabButton.grid(row=0, column=2, padx=10)
 
 def showBookingAvailabilities():
+    if not isLoggedIn:
+        messagebox.showerror("Access Denied", "You must sign in before booking a court.")
+        return
     showFrame(bookCourtFrame)
 
 def cancelSelectedBooking():
@@ -137,10 +140,7 @@ signInButton.grid(row=0, column=0, padx=20, pady=10)
 signUpButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign Up", width=200, height=45, fg_color="black", command=signUp)
 signUpButton.grid(row=0, column=1, padx=20, pady=10)
 
-#ai
-tab1 = ctk.CTkButton(app, text="Sign In", command=lambda: showFrame(signInFrame))
-tab2 = ctk.CTkButton(app, text="Book Court", command=goToBookCourt)
-tab3 = ctk.CTkButton(app, text="Payment", command=goToPaymentTab)
+
 
 #Booking Box
 ctk.CTkLabel(signInFrame, text="Your Bookings:", font=ctk.CTkFont(size=16, underline=True)).grid(row=3, column=0, pady=(20, 0))
@@ -181,7 +181,8 @@ timeSlots = ["9-10", "10-11", "11-12", "12-13", "13-14", "14-15"]
 pricePerSlot = 27
 
 slotButtons = {}
-bookedSlots = set()
+bookedSlots = {}
+selectedDate = None
 selectedSlots = set()
 
 #AI TO MAKE IT CENTRED
@@ -190,7 +191,50 @@ gridWrapper.grid(row=1, column=0, pady=20)
 gridWrapper.grid_columnconfigure(tuple(range(slotCount + 1)), weight=1)
 
 #Time slots
-ctk.CTkLabel(gridWrapper, text="Pick Date and Time", fg_color="yellow", width=100).grid(row=0, column=0, padx=1, pady=1)
+selectedDate = None
+dateFrame = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
+dateFrame.grid(row=0, column=0, sticky="w", padx=20, pady=(10, 0))  
+
+ctk.CTkLabel(dateFrame, text="Enter Date (DD/MM):", width=160).grid(row=0, column=0, padx=5, pady=5)
+dateEntry = ctk.CTkEntry(dateFrame, width=100)
+dateEntry.grid(row=0, column=1, padx=5, pady=5)
+
+def updateSlotColors():
+    if selectedDate is None:
+        return
+
+    bookedForDate = bookedSlots.get(selectedDate, set())
+
+    for court in range(courtCount):
+        for slot in range(slotCount):
+            key = (court, slot)
+            btn = slotButtons[key]
+            if key in bookedForDate:
+                btn.configure(fg_color="red", text="Booked", state="disabled")
+            else:
+                if key in selectedSlots:
+                    btn.configure(fg_color="yellow", text="", state="normal")
+                else:
+                    btn.configure(fg_color="green", text="", state="normal")
+
+#confirms the date 
+def validateDate():
+    global selectedDate, selectedSlots
+    date_text = dateEntry.get()
+    try:
+        full_date = f"{date_text}/2025"
+        datetime.strptime(full_date, "%d/%m/%Y")
+        selectedDate = full_date
+        selectedSlots.clear()   
+        messagebox.showinfo("Date Selected", f"Date set to: {selectedDate}")
+        updateSlotColors()  
+    except ValueError:
+        messagebox.showerror("Invalid Date", "Please enter date in DD/MM format.")
+
+confirmDateBtn = ctk.CTkButton(dateFrame, text="Set Date", width=80, command=validateDate)
+confirmDateBtn.grid(row=0, column=2, padx=5, pady=5)
+
+
 for i in range(slotCount):
     ctk.CTkLabel(gridWrapper, text=timeSlots[i], fg_color="lightblue", width=100).grid(row=0, column=i+1, padx=1, pady=1)
 
@@ -206,12 +250,20 @@ def updateTotalPrice():
     else:
         totalLabel.grid_remove()
         confirmButton.grid_remove()
-
 #Slot colours
 def toggleSlot(court, slot):
-    key = (court,slot)
+    global selectedDate
+    if selectedDate is None:
+        messagebox.showerror("No Date Selected", "Please select a date first.")
+        return
+
+    key = (court, slot)
     btn = slotButtons[key]
-    if key in bookedSlots:
+
+    bookedForDate = bookedSlots.get(selectedDate, set())
+
+    if key in bookedForDate:
+       
         return
 
     if key in selectedSlots:
@@ -220,6 +272,7 @@ def toggleSlot(court, slot):
     else:
         selectedSlots.add(key)
         btn.configure(fg_color="yellow")
+
     updateTotalPrice()
 
 #Generate court and slot times AI
@@ -243,20 +296,29 @@ bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
 
 
 def confirmBooking():
+    global bookedSlots, selectedDate
+    if selectedDate is None:
+        messagebox.showerror("No Date Selected", "Please select a date first.")
+        return
+
     total = len(selectedSlots) * pricePerSlot
     paymentLabel.configure(
         text=f"Total Cost: ${total}\nPayment on site.\nClick OK to confirm your booking and receive an email"
     )
 
-#mark slots as booked and makes it red so it cant be interacted
+    if selectedDate not in bookedSlots:
+        bookedSlots[selectedDate] = set()
+
     for court, slot in selectedSlots:
-        bookedSlots.add((court, slot))
+        bookedSlots[selectedDate].add((court, slot))
         btn = slotButtons[(court, slot)]
         btn.configure(fg_color="red", state="disabled", text="Booked")
 
     selectedSlots.clear()
     updateTotalPrice()
+
     showFrame(paymentFrame)
+
 
 
 totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))

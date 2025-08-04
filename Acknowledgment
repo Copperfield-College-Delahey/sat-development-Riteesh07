@@ -2,9 +2,6 @@ Using ai
 
 bookingDisplay.configure(state="disabled") #ai
 
-#to change pages
-def showFrame(frame):   #ai
-    frame.tkraise()
 
 from datetime import datetime #AI
 
@@ -41,13 +38,20 @@ bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
 bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
 
 
-#ai
-tab1 = ctk.CTkButton(app, text="Sign In", command=lambda: showFrame(signInFrame))
-tab2 = ctk.CTkButton(app, text="Book Court", command=goToBookCourt)
-tab3 = ctk.CTkButton(app, text="Payment", command=goToPaymentTab)
+#Date section was AI.
+def validateDate():
+    global selectedDate, selectedSlots
+    date_text = dateEntry.get()
+    try:
+        full_date = f"{date_text}/2025"
+        datetime.strptime(full_date, "%d/%m/%Y")
+        selectedDate = full_date
+        selectedSlots.clear()   # Clear previous selections on date change
+        messagebox.showinfo("Date Selected", f"Date set to: {selectedDate}")
+        updateSlotColors()  # Update buttons when date changes
+    except ValueError:
+        messagebox.showerror("Invalid Date", "Please enter date in DD/MM format.")
 
+confirmDateBtn = ctk.CTkButton(dateFrame, text="Set Date", width=80, command=validateDate)
+confirmDateBtn.grid(row=0, column=2, padx=5, pady=5)
 
-totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))
-confirmButton = ctk.CTkButton(bottomActionFrame, text="Confirm Booking", font=("Arial", 16), fg_color="blue", width=180, command=confirmBooking)
-totalLabel.grid_remove()
-confirmButton.grid_remove()

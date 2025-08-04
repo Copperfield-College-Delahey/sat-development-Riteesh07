@@ -41,12 +41,10 @@ bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
 bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
 
 
-def confirmBooking():
-    total = len(selectedSlots) * pricePerSlot
-    paymentLabel.configure(
-        text=f"Total Cost: ${total}\nPayment on site.\nClick OK to confirm your booking and receive an email"
-    )
-    showFrame(paymentFrame)
+#ai
+tab1 = ctk.CTkButton(app, text="Sign In", command=lambda: showFrame(signInFrame))
+tab2 = ctk.CTkButton(app, text="Book Court", command=goToBookCourt)
+tab3 = ctk.CTkButton(app, text="Payment", command=goToPaymentTab)
 
 
 totalLabel = ctk.CTkLabel(bottomActionFrame, text="Total: $0", font=("Arial", 16))

@@ -10,6 +10,7 @@ ctk.set_default_color_theme("blue")
 app = ctk.CTk()
 app.title("Badminton Booking System") 
 app.geometry ("1100x700")
+isLoggedIn = False
 
 app.grid_columnconfigure(0, weight=1)
 
@@ -22,11 +23,6 @@ navFont = ctk.CTkFont(family="Arial", size=14, weight="bold")
 signInTabButton = ctk.CTkButton(topNavFrame, text="Sign In", font=navFont, width=100, command=lambda: showFrame(signInFrame))
 signInTabButton.grid(row=0, column=0, padx=10, pady=10)
 
-bookCourtTabButton = ctk.CTkButton(topNavFrame, text="Book Court", font=navFont, width=100, command=lambda: showFrame(bookCourtFrame))
-bookCourtTabButton.grid(row=0, column=1, padx=10)
-
-paymentTabButton = ctk.CTkButton(topNavFrame, text="Payment", font=navFont, width=100, command=lambda: showFrame(paymentFrame))
-paymentTabButton.grid(row=0, column=2, padx=10)
 
 #pages
 signInFrame = ctk.CTkFrame(app)
@@ -76,20 +72,32 @@ userPassword.grid(row=5, column=0, padx=30, pady=(0, 20))
 
 #functions
 def signIn():
+    global isLoggedIn
+    name = userName.get()
     email = userEmail.get()
     password = userPassword.get()
-    if not email or not password:
-        messagebox.showerror("Error", "Please enter email and password.")
-    elif "@gmail.com" not in email:
-        messagebox.showerror("Invalid Email", "Only @ Gmail addresses are accepted.")
-    elif email not in registeredUsers:
-        messagebox.showerror("Account Not Found", "This email is not registered. Please sign up first.")
-    elif registeredUsers[email]["password"] != password:
-        messagebox.showerror("Wrong Password", "The password entered is incorrect.")
-    else:
-        name = registeredUsers[email]["name"]
-        messagebox.showinfo("Signed In", f"Welcome back, {name}!")
 
+    if name and email and password:
+        if email in registeredUsers and registeredUsers[email]["password"] == password:
+            isLoggedIn = True
+            messagebox.showinfo("Login Successful", f"Welcome back, {name}!")
+            showFrame(bookCourtFrame)
+        else:
+            messagebox.showerror("Login Failed", "Invalid email or password.")
+    else:
+        messagebox.showwarning("Sign In Failed", "Please fill in all fields.")
+
+def goToBookCourt():
+    if not isLoggedIn:
+        messagebox.showerror("Access Denied", "You must sign in before booking a court.")
+        return
+    showFrame(bookCourtFrame)
+
+def goToPaymentTab():
+    if not isLoggedIn:
+        messagebox.showerror("Access Denied", "You must sign in before accessing the payment tab.")
+        return
+    showFrame(paymentFrame)
 
 def signUp():
     name = userName.get()
@@ -106,6 +114,11 @@ def signUp():
         registeredUsers[email] = {"name": name, "password": password}
         messagebox.showinfo("Signed Up", f"Account created, {name}!")
     
+bookCourtTabButton = ctk.CTkButton(topNavFrame, text="Book Court", font=navFont, width=100, command=goToBookCourt)
+bookCourtTabButton.grid(row=0, column=1, padx=10)
+
+paymentTabButton = ctk.CTkButton(topNavFrame, text="Payment", font=navFont, width=100, command=goToPaymentTab)
+paymentTabButton.grid(row=0, column=2, padx=10)
 
 def showBookingAvailabilities():
     showFrame(bookCourtFrame)
@@ -124,6 +137,10 @@ signInButton.grid(row=0, column=0, padx=20, pady=10)
 signUpButton = ctk.CTkButton(buttonFrame, font=("Arial", 16), text="Sign Up", width=200, height=45, fg_color="black", command=signUp)
 signUpButton.grid(row=0, column=1, padx=20, pady=10)
 
+#ai
+tab1 = ctk.CTkButton(app, text="Sign In", command=lambda: showFrame(signInFrame))
+tab2 = ctk.CTkButton(app, text="Book Court", command=goToBookCourt)
+tab3 = ctk.CTkButton(app, text="Payment", command=goToPaymentTab)
 
 #Booking Box
 ctk.CTkLabel(signInFrame, text="Your Bookings:", font=ctk.CTkFont(size=16, underline=True)).grid(row=3, column=0, pady=(20, 0))
@@ -230,6 +247,15 @@ def confirmBooking():
     paymentLabel.configure(
         text=f"Total Cost: ${total}\nPayment on site.\nClick OK to confirm your booking and receive an email"
     )
+
+#mark slots as booked and makes it red so it cant be interacted
+    for court, slot in selectedSlots:
+        bookedSlots.add((court, slot))
+        btn = slotButtons[(court, slot)]
+        btn.configure(fg_color="red", state="disabled", text="Booked")
+
+    selectedSlots.clear()
+    updateTotalPrice()
     showFrame(paymentFrame)
 
 

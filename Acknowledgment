@@ -1,24 +1,62 @@
-Using ai
-
-bookingDisplay.configure(state="disabled") #ai
+                data = json.load(f) #AI
 
 
-from datetime import datetime #AI
+def save_data(): #AI
+    try:
+        serializable_booked = {
+            date: [list(pair) for pair in slots_set]
+            for date, slots_set in bookedSlots.items()
+        }
+        data = {
+            "registeredUsers": registeredUsers,
+            "userBookings": userBookings,
+            "bookedSlots": serializable_booked,
+        }
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        messagebox.showwarning("Save Error", f"Could not save data: {e}")
 
-#AI
-for frame in (signInFrame, bookCourtFrame, paymentFrame):
-    frame.grid(row=1, column=0, sticky="nsew")
-def showFrame(frame):
-    frame.tkraise()
+    global isLoggedIn #AI
 
-userPassword = ctk.CTkEntry(inputFrame, width=400, height=40, font=("Arial", 14), show="*") #show was ai
+def cancelSelectedBooking(): #HALF AI
+    global bookedSlots, userBookings, currentUserEmail
+    if not isLoggedIn or currentUserEmail not in userBookings:
+        messagebox.showerror("Not Signed In", "Please sign in first.")
+        return
+    if not cancelSelection:
+        messagebox.showinfo("Nothing Selected", "Select bookings first, then click Cancel.")
+        return
+
+showFrame(signInFrame)  #ai
+
 
 #AI TO MAKE IT CENTRED
 gridWrapper = ctk.CTkFrame(bookCourtFrame, fg_color="transparent")
 gridWrapper.grid(row=1, column=0, pady=20)
-gridWrapper.grid_columnconfigure(tuple(range(slot_count + 1)), weight=1)
+gridWrapper.grid_columnconfigure(tuple(range(slotCount + 1)), weight=1)
 
-#Generate court and slot times (HALF AI)
+def updateSlotColors(): #half ai
+    if selectedDate is None:
+        for btn in slotButtons.values():
+            btn.configure(fg_color="grey", state="disabled", text="")
+        return
+
+    bookedForDate = bookedSlots.get(selectedDate, set())
+
+    for court in range(courtCount):
+        for slot in range(slotCount):
+            key = (court, slot)
+            btn = slotButtons[key]
+            if key in bookedForDate:
+                btn.configure(fg_color="red", text="Booked", state="disabled")
+            else:
+                if key in selectedSlots:
+                    btn.configure(fg_color="yellow", text="", state="normal")
+                else:
+                    btn.configure(fg_color="green", text="", state="normal")
+
+#Generate court and slot times AI
 for court in range(courtCount):
     ctk.CTkLabel(gridWrapper, text=f"Court {court + 1}", fg_color="lightblue", width=100).grid(row=court + 1, column=0, padx=1, pady=1)
 
@@ -32,26 +70,45 @@ for court in range(courtCount):
     bookingButtons.append(rowButtons)
     slotButtons.update({(court, slot): btn for slot, btn in enumerate(rowButtons)})
 
-#the confirm button (HALF AI)
-bottomActionFrame = ctk.CTkFrame(bookCourtFrame)
-bottomActionFrame.grid(row=2, column=0, pady=10, sticky="ew")
-bottomActionFrame.grid_columnconfigure((0, 1), weight=1)
+    # Prevent sending obviously taken slots forward
+    bookedForDate = bookedSlots.get(selectedDate, set())
+    for pair in selectedSlots:
+        if pair in bookedForDate:
+            messagebox.showerror("Slot Taken", "One or more selected slots are already booked.")
+            return
+
+    # Stash selections for final confirmation on Payment tab
+    pendingSelections = set(selectedSlots)
+    pendingDate = selectedDate
 
 
-#Date section was AI.
-def validateDate():
-    global selectedDate, selectedSlots
-    date_text = dateEntry.get()
-    try:
-        full_date = f"{date_text}/2025"
-        datetime.strptime(full_date, "%d/%m/%Y")
-        selectedDate = full_date
-        selectedSlots.clear()   # Clear previous selections on date change
-        messagebox.showinfo("Date Selected", f"Date set to: {selectedDate}")
-        updateSlotColors()  # Update buttons when date changes
-    except ValueError:
-        messagebox.showerror("Invalid Date", "Please enter date in DD/MM format.")
+    def paymentOK(): #half ai
+    """Finalize the booking here when user clicks OK."""
+    global bookedSlots, userBookings, pendingSelections, pendingDate, selectedSlots
+    if not pendingSelections or pendingDate is None:
+        showFrame(signInFrame)
+        return
 
-confirmDateBtn = ctk.CTkButton(dateFrame, text="Set Date", width=80, command=validateDate)
-confirmDateBtn.grid(row=0, column=2, padx=5, pady=5)
+    # Commit the booking now
+    if pendingDate not in bookedSlots:
+        bookedSlots[pendingDate] = set()
+    bookedSlots[pendingDate].update(pendingSelections)
 
+    if currentUserEmail not in userBookings:
+        userBookings[currentUserEmail] = []
+    for court, slot in pendingSelections:
+        userBookings[currentUserEmail].append({"date": pendingDate, "court": court, "slot": slot})
+
+        # If we're still on the same date in the grid, mark buttons red
+        if pendingDate == selectedDate and (court, slot) in slotButtons:
+            btn = slotButtons[(court, slot)]
+            btn.configure(fg_color="red", state="disabled", text="Booked")
+
+    # Clear working selections & refresh UI
+    selectedSlots.clear()
+    pendingSelections.clear()
+    # Keep pendingDate for the grid's current date; do not clear selectedDate
+    displayBookings()
+    updateSlotColors()
+    updateTotalPrice()
+    save_data()
